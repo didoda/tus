@@ -68,12 +68,9 @@ class CleanExpiredCommand extends Command
         return new class (Configure::read('Tus.cache')) extends Server
         {
             /**
-             * Check if content is expired - even if upload is completed
-             *
-             * @param array|null $contents Cache content
-             * @return bool
+             * @inheritDoc
              */
-            protected function isExpired($contents): bool
+            protected function isExpired(mixed $contents): bool
             {
                 $expiresAt = Hash::get((array)$contents, 'expires_at');
 
