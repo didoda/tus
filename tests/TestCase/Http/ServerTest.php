@@ -16,6 +16,8 @@ declare(strict_types=1);
 namespace BEdita\Tus\Test\TestCase\Http;
 
 use BEdita\Tus\Http\Server;
+use BEdita\Tus\Http\ServerFactory;
+use Cake\Core\Configure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +29,34 @@ class ServerTest extends TestCase
      */
     public function testUpdateCache(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        // no cached data
+        $tusConf = Configure::read('Tus');
+        $tusConf['endpoint'] .= '/files';
+        $server = ServerFactory::create($tusConf);
+        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/testuploads');
+        $server->updateCache();
+        $key = $server->getRequest()->key();
+        $cache = $server->getCache();
+        $this->assertNull($cache->get($key));
+
+        // cached data exists, but no object id in headers
+        // TODO: make it work
+        // $cache->set($key, 'foo');
+        // $server->setCache($cache);
+        // $server->updateCache();
+        // $this->assertSame('foo', $cache->get($key));
+
+        // cached data exists, object id and object type in headers
+        // TODO: make it work
+        // $response = $server->getResponse();
+        // $headers = $response->getHeaders();
+        // $headers[] = Server::BEDITA_OBJECT_ID_HEADER . ': 42';
+        // $headers[] = Server::BEDITA_OBJECT_TYPE_HEADER . ': "documents"';
+        // $response->setHeaders($headers);
+        // $server->setResponse($response);
+        // $server->updateCache();
+        // $expected = ['foo' => 'bar', ['bedita' => ['object_id' => 42, 'object_type' => 'documents']]];
+        // $this->assertSame($expected, $server->getCache()->get($key));
     }
 
     /**

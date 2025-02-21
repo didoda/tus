@@ -21,6 +21,8 @@ declare(strict_types=1);
  * installed as a dependency of an application.
  */
 
+use BEdita\Core\Filesystem\Adapter\LocalAdapter;
+use BEdita\Core\Filesystem\FilesystemRegistry;
 use Cake\Cache\Cache;
 use Cake\Cache\Engine\ArrayEngine;
 use Cake\Cache\Engine\NullEngine;
@@ -57,6 +59,7 @@ define('LOGS', ROOT . DS . 'logs' . DS);
 define('CONFIG', ROOT . DS . 'config' . DS);
 define('CACHE', TMP . 'cache' . DS);
 define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS);
+define('WWW_ROOT', ROOT . 'www' . DS);
 
 Configure::write('debug', true);
 Configure::write('App', [
@@ -78,6 +81,43 @@ Log::setConfig([
         'levels' => ['warning', 'error', 'critical', 'alert', 'emergency'],
     ],
 ]);
+
+FilesystemRegistry::dropAll();
+Configure::write('Filesystem', [
+    'tus' => [
+        'className' => LocalAdapter::class,
+        'path' => 'tests',
+        'uploadDir' => 'uploads',
+    ],
+]);
+FilesystemRegistry::getInstance()->setConfig(Configure::read('Filesystem'));
+Configure::write([
+    'Tus' => [
+        'endpoint' => env('TUS_ENDPOINT', 'tus'),
+        'filesystem' => env('TUS_FILESYSTEM', 'tus'),
+        'uploadDir' => env('TUS_UPLOAD_DIR', 'uploads'),
+        'cache' => env('TUS_CACHE_ENGINE', 'file'),
+        'server' => [
+            'redis' => [
+                'host' => env('TUS_REDIS_HOST', '127.0.0.1'),
+                'port' => env('TUS_REDIS_PORT', '6379'),
+                'database' => env('TUS_REDIS_DB', 0),
+            ],
+            'file' => [
+                'dir' => env('TUS_CACHE_DIR', TMP),
+                'name' => env('TUS_CACHE_FILE', 'tus_php.server.cache'),
+            ],
+        ],
+        'trustedProxies' => [
+            'proxies' => env('TUS_TRUSTED_PROXIES', '*'),
+            'headers' => env('TUS_TRUSTED_HEADERS'),
+        ],
+        'headers' => [
+            'exclude' => env('TUS_HEADERS_EXCLUDE'),
+        ],
+    ],
+]);
+
 
 Cache::drop('_bedita_object_types_');
 Cache::drop('_bedita_core_');
