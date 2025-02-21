@@ -14,14 +14,14 @@ on:
 
 jobs:
   cs:
-    uses: bedita/github-workflows/.github/workflows/php-cs.yml@v1
+    uses: bedita/github-workflows/.github/workflows/php-cs.yml@v2
     with:
-      php_versions: '["7.4", "8.0", "8.1"]'
+      php_versions: '["8.3"]'
 
   stan:
-    uses: bedita/github-workflows/.github/workflows/php-stan.yml@v1
+    uses: bedita/github-workflows/.github/workflows/php-stan.yml@v2
     with:
-      php_versions: '["7.4", "8.0", "8.1"]'
+      php_versions: '["8.3"]'
 
   unit:
     name: 'Run unit tests'
@@ -32,16 +32,14 @@ jobs:
       fail-fast: false
       matrix:
         php:
-          - '7.4'
-          - '8.0'
-          - '8.1'
+          - '8.3'
 
     env:
       PHP_VERSION: '${{ matrix.php }}'
 
     steps:
       - name: 'Checkout current revision'
-        uses: 'actions/checkout@v2'
+        uses: 'actions/checkout@v4'
 
       - name: 'Setup PHP'
         uses: 'shivammathur/setup-php@v2'
@@ -56,7 +54,7 @@ jobs:
         run: 'echo "::set-output name=path::$(composer global config cache-dir)"'
 
       - name: 'Share Composer cache across runs'
-        uses: 'actions/cache@v2'
+        uses: 'actions/cache@v4'
         with:
           path: '${{ steps.cachedir.outputs.path }}'
           key: "composer-${{ matrix.php }}-${{ hashFiles('**/composer.json') }}"
@@ -71,17 +69,18 @@ jobs:
         run: 'composer dump-autoload --classmap-authoritative --no-cache'
 
       - name: 'Run PHPUnit'
-        run: 'phpdbg -qrr vendor/bin/phpunit --coverage-clover=clover.xml'
+        run: 'vendor/bin/phpunit --coverage-clover=${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml'
 
       - name: 'Export coverage results'
-        uses: 'codecov/codecov-action@v1'
+        uses: 'codecov/codecov-action@v5'
         with:
-          file: './clover.xml'
+          token: ${{ secrets.CODECOV_TOKEN }} # required
+          files: './${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml'
           env_vars: PHP_VERSION
 
       - name: 'Archive code coverage results'
-        uses: 'actions/upload-artifact@v2'
+        uses: 'actions/upload-artifact@v4'
         with:
-          name: 'PHP ${{ matrix.php }}'
-          path: 'clover.xml'
+          name: 'PHP-${{ matrix.php-version }}-strategy-job-index-${{ strategy.job-index }}'
+          path: '${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml'
 
