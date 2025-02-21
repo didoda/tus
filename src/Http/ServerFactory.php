@@ -48,16 +48,16 @@ class ServerFactory
     /**
      * The upload path
      *
-     * @var string
+     * @var string|null
      */
-    protected string $uploadPath = null;
+    protected ?string $uploadPath = null;
 
     /**
      * Instance of Tus server
      *
-     * @var \BEdita\Tus\Http\Server
+     * @var \BEdita\Tus\Http\Server|null
      */
-    protected Server $tusServer = null;
+    protected ?Server $tusServer = null;
 
     /**
      * Create ServerFactory instance.
