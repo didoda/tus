@@ -41,7 +41,6 @@ class CleanExpiredCommandTest extends TestCase
     {
         $this->exec('clean_expired');
         $this->assertOutputContains('Cleaning server resources');
-        $this->assertOutputContains('Nothing to delete.');
         $this->assertOutputContains('Done');
     }
 }

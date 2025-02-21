@@ -118,7 +118,6 @@ Configure::write([
     ],
 ]);
 
-
 Cache::drop('_bedita_object_types_');
 Cache::drop('_bedita_core_');
 Cache::setConfig([
