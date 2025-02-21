@@ -1,18 +1,19 @@
 {
     "name": "bedita/tus",
-    "description": "Tus plugin for BEdita 5",
+    "description": "BEdita Tus",
     "type": "cakephp-plugin",
     "license": "LGPL-3.0-or-later",
     "require": {
-        "bedita/core": "^5.0.0",
-        "bedita/api": "^5.0.0",
-        "ankitpokhrel/tus-php": "^2.2",
-        "bedita/aws": "^3.0.0"
+        "php": ">=8.3",
+        "bedita/core": "^5.36",
+        "bedita/api": "^5.36",
+        "ankitpokhrel/tus-php": "^2.4",
+        "bedita/aws": "^4"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.5",
-        "cakephp/cakephp-codesniffer": "~4.5.1",
-        "phpstan/phpstan": "^1.5"
+        "phpunit/phpunit": "^11",
+        "cakephp/cakephp-codesniffer": "^5",
+        "phpstan/phpstan": "^1.12"
     },
     "autoload": {
         "psr-4": {
