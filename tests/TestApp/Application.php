@@ -43,8 +43,6 @@ class Application extends BaseApplication
      */
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
-        $middlewareQueue = parent::middleware($middlewareQueue);
-
         return $middlewareQueue->add(new RoutingMiddleware($this));
     }
 }
