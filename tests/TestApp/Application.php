@@ -35,6 +35,7 @@ class Application extends BaseApplication
         $this->addPlugin('BEdita/Core');
         $this->addPlugin('BEdita/API');
         $this->addPlugin('BEdita/Tus');
+        parent::bootstrap();
     }
 
     /**
@@ -42,6 +43,8 @@ class Application extends BaseApplication
      */
     public function middleware(MiddlewareQueue $middlewareQueue): MiddlewareQueue
     {
+        $middlewareQueue = parent::middleware($middlewareQueue);
+
         return $middlewareQueue->add(new RoutingMiddleware($this));
     }
 }
