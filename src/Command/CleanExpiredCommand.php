@@ -70,7 +70,7 @@ class CleanExpiredCommand extends Command
             /**
              * @inheritDoc
              */
-            protected function isExpired(mixed $contents): bool
+            protected function isExpired($contents): bool
             {
                 $expiresAt = Hash::get((array)$contents, 'expires_at');
 
