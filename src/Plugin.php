@@ -45,7 +45,7 @@ class Plugin extends BasePlugin
      */
     public function middleware(MiddlewareQueue $middleware): MiddlewareQueue
     {
-        $middleware->insertBefore(CorsMiddleware::class, new TusMiddleware(Configure::read('Tus')));
+        $middleware->insertBefore(CorsMiddleware::class, new TusMiddleware((array)Configure::read('Tus')));
 
         return $middleware;
     }

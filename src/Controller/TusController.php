@@ -21,8 +21,10 @@ use BEdita\Tus\Http\ResponseTrait;
 use BEdita\Tus\Http\ServerFactory;
 use Cake\Core\Configure;
 use Cake\Datasource\EntityInterface;
+use Cake\Datasource\ResultSetInterface;
 use Cake\Event\EventInterface;
 use Cake\Http\Exception\BadRequestException;
+use Cake\Http\Response;
 use TusPhp\Events\UploadComplete;
 
 /**
@@ -40,7 +42,7 @@ class TusController extends AppController
      *
      * @var \Cake\Datasource\ResultSetInterface
      */
-    protected $allowedTypes = null;
+    protected ResultSetInterface $allowedTypes = null;
 
     /**
      * @inheritDoc
@@ -69,7 +71,7 @@ class TusController extends AppController
      * @param \Cake\Event\EventInterface $event The event
      * @return void
      */
-    public function beforeFilter(EventInterface $event)
+    public function beforeFilter(EventInterface $event): void
     {
         parent::beforeFilter($event);
 
@@ -85,7 +87,7 @@ class TusController extends AppController
      * @param string $type The object type
      * @return \Cake\Http\Response
      */
-    public function server($type)
+    public function server(string $type): Response
     {
         $objectType = $this->allowedTypes->firstMatch(['name' => $type]);
         if (!$objectType instanceof EntityInterface) {

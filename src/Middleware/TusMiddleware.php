@@ -35,11 +35,16 @@ class TusMiddleware implements MiddlewareInterface
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'endpoint' => '/tus',
     ];
 
-    protected $uploadPath = null;
+    /**
+     * The upload path.
+     *
+     * @var string|null
+     */
+    protected ?string $uploadPath = null;
 
     /**
      * Constructor.

@@ -35,7 +35,7 @@ class ServerFactory
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'filesystem' => 'tus',
         'uploadDir' => 'uploads',
         'cache' => 'file',
@@ -50,14 +50,14 @@ class ServerFactory
      *
      * @var string
      */
-    protected $uploadPath = null;
+    protected string $uploadPath = null;
 
     /**
      * Instance of Tus server
      *
      * @var \BEdita\Tus\Http\Server
      */
-    protected $tusServer = null;
+    protected Server $tusServer = null;
 
     /**
      * Create ServerFactory instance.

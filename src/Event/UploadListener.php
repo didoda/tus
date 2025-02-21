@@ -20,12 +20,16 @@ use BEdita\Core\Model\Action\SaveEntityAction;
 use BEdita\Core\Model\Entity\ObjectEntity;
 use BEdita\Core\Model\Entity\ObjectType;
 use BEdita\Core\Model\Table\MediaTable;
+use BEdita\Core\Model\Table\ObjectsBaseTable;
+use BEdita\Core\Model\Table\StreamsTable;
 use BEdita\Tus\Http\Server;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Event\EventDispatcherTrait;
 use Cake\Log\LogTrait;
 use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\Utility\Hash;
+use Exception;
+use InvalidArgumentException;
 use TusPhp\Events\TusEvent;
 use TusPhp\File;
 
@@ -44,14 +48,14 @@ class UploadListener
      *
      * @var \BEdita\Core\Model\Table\StreamsTable
      */
-    protected $Streams = null;
+    protected StreamsTable $Streams = null;
 
     /**
      * Table instance for media type
      *
      * @var \BEdita\Core\Model\Table\ObjectsBaseTable
      */
-    protected $Table = null;
+    protected ObjectsBaseTable $Table = null;
 
     /**
      * Default configuration.
@@ -62,7 +66,7 @@ class UploadListener
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'filesystem' => 'tus',
         'uploadDir' => 'uploads',
         'objectType' => null, // required
@@ -78,7 +82,7 @@ class UploadListener
         $this->setConfig($config);
         $objectType = $this->getConfig('objectType');
         if (!$objectType instanceof ObjectType) {
-            throw new \InvalidArgumentException('Missing "objectType" entity or not valid');
+            throw new InvalidArgumentException('Missing "objectType" entity or not valid');
         }
 
         $this->setTable($objectType->alias);
@@ -93,7 +97,7 @@ class UploadListener
      * @return void
      * @throws \InvalidArgumentException If table doesn't represent a media
      */
-    protected function setTable(string $table)
+    protected function setTable(string $table): void
     {
         $this->Table = $this->getTableLocator()->get($table);
 
@@ -101,7 +105,7 @@ class UploadListener
             return;
         }
 
-        throw new \InvalidArgumentException(sprintf('table %s must represent a media', $table));
+        throw new InvalidArgumentException(sprintf('table %s must represent a media', $table));
     }
 
     /**
@@ -110,7 +114,7 @@ class UploadListener
      * @param \TusPhp\Events\TusEvent $event The Tus event.
      * @return \TusPhp\Events\TusEvent
      */
-    public function onUploadComplete(TusEvent $event)
+    public function onUploadComplete(TusEvent $event): TusEvent
     {
         $response = $event->getResponse();
         try {
@@ -119,7 +123,7 @@ class UploadListener
                 Server::BEDITA_OBJECT_ID_HEADER => $entity->id,
                 Server::BEDITA_OBJECT_TYPE_HEADER => $entity->type,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw $e;
         }
 
@@ -172,7 +176,7 @@ class UploadListener
             $mountManager = FilesystemRegistry::getMountManager();
             try {
                 $mountManager->delete($srcPath);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->log(sprintf('Error removing temporary file uplaoded in %s destination', $srcPath));
             }
 

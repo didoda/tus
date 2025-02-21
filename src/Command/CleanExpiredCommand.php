@@ -73,7 +73,7 @@ class CleanExpiredCommand extends Command
              * @param array|null $contents Cache content
              * @return bool
              */
-            protected function isExpired($contents): bool
+            protected function isExpired(?array $contents): bool
             {
                 $expiresAt = Hash::get((array)$contents, 'expires_at');
 
@@ -86,7 +86,7 @@ class CleanExpiredCommand extends Command
              * @param mixed $cache Cache configuration
              * @return self
              */
-            public function setCache($cache): self
+            public function setCache(mixed $cache): self
             {
                 parent::setCache($cache);
                 $this->cache->setPrefix('tus:server:');

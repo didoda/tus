@@ -38,7 +38,7 @@ class HeadersMiddleware implements TusMiddleware
      *
      * @var array
      */
-    protected $_defaultConfig = [
+    protected array $_defaultConfig = [
         'exclude' => [],
     ];
 
