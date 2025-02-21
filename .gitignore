@@ -28,3 +28,4 @@ Thumbs.db
 config/Migrations/schema-dump-default.lock
 /tests/sso/config.js
 /coverage
+.phpunit.result.cache
