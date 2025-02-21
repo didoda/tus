@@ -16,17 +16,32 @@ declare(strict_types=1);
 namespace BEdita\Tus\Test\TestCase\Command;
 
 use BEdita\Tus\Command\CleanExpiredCommand;
+use Cake\Console\TestSuite\ConsoleIntegrationTestTrait;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 #[CoversClass(CleanExpiredCommand::class)]
 class CleanExpiredCommandTest extends TestCase
 {
+    use ConsoleIntegrationTestTrait;
+
     /**
-     * Test `execute` method
+     * @inheritDoc
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->useCommandRunner();
+    }
+
+    /**
+     * Test `execute` and `tusServer` methods
      */
     public function testExecute(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->exec('clean_expired');
+        $this->assertOutputContains('Cleaning server resources');
+        $this->assertOutputContains('Nothing to delete.');
+        $this->assertOutputContains('Done');
     }
 }

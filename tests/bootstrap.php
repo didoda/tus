@@ -60,6 +60,7 @@ define('CORE_PATH', $root . DS . 'vendor' . DS . 'cakephp' . DS . 'cakephp' . DS
 
 Configure::write('debug', true);
 Configure::write('App', [
+    'namespace' => 'BEdita\Tus\Test\TestApp',
     'encoding' => 'UTF-8',
     'paths' => [
         'plugins' => [ROOT . 'Plugin' . DS],
