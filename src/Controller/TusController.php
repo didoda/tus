@@ -40,9 +40,9 @@ class TusController extends AppController
     /**
      * The media object types supported.
      *
-     * @var \Cake\Datasource\ResultSetInterface
+     * @var \Cake\Datasource\ResultSetInterface|null
      */
-    protected ResultSetInterface $allowedTypes = null;
+    protected ?ResultSetInterface $allowedTypes = null;
 
     /**
      * @inheritDoc
