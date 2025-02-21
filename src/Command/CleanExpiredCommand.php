@@ -73,7 +73,7 @@ class CleanExpiredCommand extends Command
              * @param array|null $contents Cache content
              * @return bool
              */
-            protected function isExpired(?array $contents): bool
+            protected function isExpired($contents): bool
             {
                 $expiresAt = Hash::get((array)$contents, 'expires_at');
 
