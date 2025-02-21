@@ -16,17 +16,26 @@ declare(strict_types=1);
 namespace BEdita\Tus\Test\TestCase\Http;
 
 use BEdita\Tus\Http\ResponseTrait;
+use Cake\Http\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 #[CoversClass(ResponseTrait::class)]
 class ResponseTraitTest extends TestCase
 {
+    use ResponseTrait;
+
     /**
      * Test `toCakeResponse` method
      */
     public function testToCakeResponse(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $httpResponse = new HttpResponse('{"message": "Hello, World!"}', 200, ['Content-Type' => 'application/json']);
+        $response = $this->toCakeResponse($httpResponse);
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('application/json', $response->getHeaderLine('Content-Type'));
+        $this->assertSame('{"message": "Hello, World!"}', (string)$response->getBody());
     }
 }
