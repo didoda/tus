@@ -33,30 +33,29 @@ class ServerTest extends TestCase
         $tusConf = Configure::read('Tus');
         $tusConf['endpoint'] .= '/files';
         $server = ServerFactory::create($tusConf);
-        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/testuploads');
+        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/mytestuploads' . rand(1, 1000));
         $server->updateCache();
         $key = $server->getRequest()->key();
         $cache = $server->getCache();
         $this->assertNull($cache->get($key));
 
         // cached data exists, but no object id in headers
-        // TODO: make it work
-        // $cache->set($key, 'foo');
-        // $server->setCache($cache);
-        // $server->updateCache();
-        // $this->assertSame('foo', $cache->get($key));
+        $val = ['expires_at' => 'Wed, 24 Feb 2026 12:34:56 GMT', 'data' => ['foo' => 'bar']];
+        $cache->set($key, $val);
+        $server->setCache($cache);
+        $server->updateCache();
+        $this->assertSame($val, $cache->get($key));
 
         // cached data exists, object id and object type in headers
-        // TODO: make it work
-        // $response = $server->getResponse();
-        // $headers = $response->getHeaders();
-        // $headers[] = Server::BEDITA_OBJECT_ID_HEADER . ': 42';
-        // $headers[] = Server::BEDITA_OBJECT_TYPE_HEADER . ': "documents"';
-        // $response->setHeaders($headers);
-        // $server->setResponse($response);
-        // $server->updateCache();
-        // $expected = ['foo' => 'bar', ['bedita' => ['object_id' => 42, 'object_type' => 'documents']]];
-        // $this->assertSame($expected, $server->getCache()->get($key));
+        $response = $server->getResponse();
+        $headers = $response->getHeaders();
+        $headers[Server::BEDITA_OBJECT_ID_HEADER] = 42;
+        $headers[Server::BEDITA_OBJECT_TYPE_HEADER] = 'documents';
+        $response->setHeaders($headers);
+        $server->setResponse($response);
+        $server->updateCache();
+        $expected = $val + ['bedita' => ['object_id' => 42, 'object_type' => 'documents']];
+        $this->assertSame($expected, $server->getCache()->get($key));
     }
 
     /**
