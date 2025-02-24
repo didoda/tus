@@ -20,6 +20,7 @@ use BEdita\Tus\Http\ServerFactory;
 use Cake\Core\Configure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Response;
 
 #[CoversClass(Server::class)]
@@ -90,7 +91,35 @@ class ServerTest extends TestCase
      */
     public function testHandleHead(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $tusConf = Configure::read('Tus');
+        $tusConf['endpoint'] .= '/files';
+        $server = ServerFactory::create($tusConf);
+        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/mytestuploads' . rand(1, 1000));
+        // handle head is protected... make it public through reflection
+        $method = new ReflectionMethod(Server::class, 'handleHead');
+        $method->setAccessible(true);
+        $actual = $method->invoke($server);
+        $this->assertInstanceOf(Response::class, $actual);
+        $cache = $server->getCache();
+        $key = $server->getRequest()->key();
+        $this->assertNull($cache->get($key));
+
+        // set cache data
+        $expected = [
+            'expires_at' => 'Wed, 24 Feb 2026 12:34:56 GMT',
+            'data' => ['foo' => 'bar'],
+            'bedita' => [
+                'object_id' => 42,
+                'object_type' => 'documents',
+            ],
+        ];
+        $cache->set($key, $expected);
+        $server->setCache($cache);
+        $actual = $method->invoke($server);
+        $this->assertInstanceOf(Response::class, $actual);
+        $headers = $actual->headers->allPreserveCase();
+        $this->assertSame('42', $headers[Server::BEDITA_OBJECT_ID_HEADER][0]);
+        $this->assertSame('documents', $headers[Server::BEDITA_OBJECT_TYPE_HEADER][0]);
     }
 
     /**
