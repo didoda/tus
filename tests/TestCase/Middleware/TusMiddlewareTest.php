@@ -16,8 +16,13 @@ declare(strict_types=1);
 namespace BEdita\Tus\Test\TestCase\Middleware;
 
 use BEdita\Tus\Middleware\TusMiddleware;
+use Cake\Core\Configure;
+use Cake\Http\Response;
+use Cake\Http\ServerRequest;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 
 #[CoversClass(TusMiddleware::class)]
 class TusMiddlewareTest extends TestCase
@@ -27,7 +32,8 @@ class TusMiddlewareTest extends TestCase
      */
     public function testContructor(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $middleware = new TusMiddleware(['endpoint' => 'my/files']);
+        $this->assertSame(['endpoint' => '/my/files'], $middleware->getConfig());
     }
 
     /**
@@ -35,6 +41,30 @@ class TusMiddlewareTest extends TestCase
      */
     public function testProcess(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        // method is not OPTIONS and no endpoint in config
+        $middleware = new TusMiddleware([]);
+        $request = new ServerRequest();
+        $response = $this->createMock(ResponseInterface::class);
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $handler->expects($this->once())
+            ->method('handle')
+            ->with($request)
+            ->willReturn($response);
+        $this->assertSame($response, $middleware->process($request, $handler));
+
+        // method is OPTIONS and endpoint in config
+        $request = new ServerRequest(
+            [
+                'environment' => ['REQUEST_METHOD' => 'OPTIONS'],
+            ]
+        );
+        $middleware = new TusMiddleware([]);
+        $handler = $this->createMock(RequestHandlerInterface::class);
+        $tusConf = Configure::read('Tus');
+        $tusConf['headers'] = ['exclude' => ['Access-Control-Allow-Origin']];
+        $tusConf['endpoint'] = '/';
+        $middleware->setConfig($tusConf);
+        $actual = $middleware->process($request, $handler);
+        $this->assertInstanceOf(Response::class, $actual);
     }
 }
