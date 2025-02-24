@@ -46,16 +46,16 @@ class UploadListener
     /**
      * StreamsTable instance.
      *
-     * @var \BEdita\Core\Model\Table\StreamsTable
+     * @var \BEdita\Core\Model\Table\StreamsTable|null
      */
-    protected StreamsTable $Streams = null;
+    protected ?StreamsTable $Streams = null;
 
     /**
      * Table instance for media type
      *
-     * @var \BEdita\Core\Model\Table\ObjectsBaseTable
+     * @var \BEdita\Core\Model\Table\ObjectsBaseTable|null
      */
-    protected ObjectsBaseTable $Table = null;
+    protected ?ObjectsBaseTable $Table = null;
 
     /**
      * Default configuration.
