@@ -117,11 +117,9 @@ class ServerFactory
         $uploadDir = $this->getConfig('uploadDir');
         $manager = FilesystemRegistry::getMountManager();
         $dir = sprintf('%s://%s', $this->getConfig('filesystem'), $uploadDir);
-        if ($manager->fileExists($dir)) {
-            return;
+        if (!$manager->fileExists($dir)) {
+            $manager->createDirectory($dir);
         }
-
-        $manager->createDirectory($dir);
     }
 
     /**
