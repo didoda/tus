@@ -43,28 +43,4 @@ class ServerFactoryTest extends TestCase
         $actual = ServerFactory::create($tusConf);
         $this->assertInstanceOf(Server::class, $actual);
     }
-
-    /**
-     * Test `getServer` method
-     */
-    public function testGetServer(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test `ensureUploadDir` method
-     */
-    public function testEnsureUploadDir(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test `setupFilesystem` method
-     */
-    public function testSetupFilesystem(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
 }
