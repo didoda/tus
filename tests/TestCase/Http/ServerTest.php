@@ -127,6 +127,26 @@ class ServerTest extends TestCase
      */
     public function testHandlePatch(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $tusConf = Configure::read('Tus');
+        $tusConf['endpoint'] .= '/files';
+        $server = ServerFactory::create($tusConf);
+        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/mytestuploads' . rand(1, 1000));
+        $expected = [
+            'expires_at' => 'Wed, 24 Feb 2026 12:34:56 GMT',
+            'data' => ['foo' => 'bar'],
+            'bedita' => [
+                'object_id' => 42,
+                'object_type' => 'documents',
+            ],
+        ];
+        $cache = $server->getCache();
+        $key = $server->getRequest()->key();
+        $cache->set($key, $expected);
+        $server->setCache($cache);
+        // handle patch is protected... make it public through reflection
+        $method = new ReflectionMethod(Server::class, 'handlePatch');
+        $method->setAccessible(true);
+        $actual = $method->invoke($server);
+        $this->assertInstanceOf(Response::class, $actual);
     }
 }
