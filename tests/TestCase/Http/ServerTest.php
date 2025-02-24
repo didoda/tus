@@ -20,6 +20,7 @@ use BEdita\Tus\Http\ServerFactory;
 use Cake\Core\Configure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 #[CoversClass(Server::class)]
 class ServerTest extends TestCase
@@ -63,7 +64,25 @@ class ServerTest extends TestCase
      */
     public function testServe(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $tusConf = Configure::read('Tus');
+        $tusConf['endpoint'] .= '/files';
+        $server = ServerFactory::create($tusConf);
+        $server->getRequest()->getRequest()->server->set('REQUEST_URI', '/mytestuploads' . rand(1, 1000));
+        $cache = $server->getCache();
+        $key = $server->getRequest()->key();
+        $val = ['expires_at' => 'Wed, 24 Feb 2026 12:34:56 GMT', 'data' => ['foo' => 'bar']];
+        $cache->set($key, $val);
+        $server->setCache($cache);
+        $response = $server->getResponse();
+        $headers = $response->getHeaders();
+        $headers[Server::BEDITA_OBJECT_ID_HEADER] = 42;
+        $headers[Server::BEDITA_OBJECT_TYPE_HEADER] = 'documents';
+        $response->setHeaders($headers);
+        $server->setResponse($response);
+        $actual = $server->serve();
+        $this->assertInstanceOf(Response::class, $actual);
+        $expected = $val + ['bedita' => ['object_id' => 42, 'object_type' => 'documents']];
+        $this->assertSame($expected, $server->getCache()->get($key));
     }
 
     /**
