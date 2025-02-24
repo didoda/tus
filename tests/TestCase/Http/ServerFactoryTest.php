@@ -15,7 +15,9 @@ declare(strict_types=1);
 
 namespace BEdita\Tus\Test\TestCase\Http;
 
+use BEdita\Tus\Http\Server;
 use BEdita\Tus\Http\ServerFactory;
+use Cake\Core\Configure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -27,15 +29,19 @@ class ServerFactoryTest extends TestCase
      */
     public function testContructor(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $factory = new ServerFactory(['endpoint' => 'my/files']);
+        $this->assertSame('/my/files', $factory->getConfig()['endpoint']);
     }
 
     /**
-     * Test `create` method
+     * Test `create`, `getServer`, `setupFilesystem`, `ensureUploadDir` methods
      */
     public function testCreate(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $tusConf = Configure::read('Tus');
+        $tusConf['endpoint'] .= '/files';
+        $actual = ServerFactory::create($tusConf);
+        $this->assertInstanceOf(Server::class, $actual);
     }
 
     /**
