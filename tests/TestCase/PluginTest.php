@@ -55,6 +55,7 @@ class PluginTest extends TestCase
                 return $middlewareQueue;
             }
         };
+        Configure::delete('Tus');
         $this->plugin->bootstrap($app);
         $actual = Configure::read('Tus');
         static::assertNotEmpty($actual);
