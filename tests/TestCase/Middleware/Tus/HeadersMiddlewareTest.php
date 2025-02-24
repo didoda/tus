@@ -15,9 +15,12 @@ declare(strict_types=1);
 
 namespace BEdita\Tus\Test\TestCase\Middleware;
 
+use BEdita\Tus\Http\Server;
 use BEdita\Tus\Middleware\Tus\HeadersMiddleware;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use TusPhp\Request;
+use TusPhp\Response;
 
 #[CoversClass(HeadersMiddleware::class)]
 class HeadersMiddlewareTest extends TestCase
@@ -27,30 +30,27 @@ class HeadersMiddlewareTest extends TestCase
      */
     public function testContructor(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $middleware = new HeadersMiddleware(['exclude' => 'header1,header2']);
+        $this->assertSame(['exclude' => ['header1', 'header2']], $middleware->getConfig());
     }
 
     /**
-     * Test `handle` method
+     * Test `handle`, `unsetHeader`, `extendsCors` methods
      */
-    public function testHandle(): void
+    public function testHeaders(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test `unsetHeader` method
-     */
-    public function testUnsetHeader(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
-    }
-
-    /**
-     * Test `extendsCors` method
-     */
-    public function testExtendsCors(): void
-    {
-        $this->markTestIncomplete('Not implemented yet.');
+        $middleware = new HeadersMiddleware(['exclude' => 'Custom']);
+        $request = new Request();
+        $response = new Response();
+        $response->setHeaders([
+            'Access-Control-Allow-Headers' => 'test',
+            'Access-Control-Expose-Headers' => 'test',
+            'Custom' => 'header1,header2,header3',
+        ]);
+        $middleware->handle($request, $response);
+        $headers = $response->getHeaders();
+        $this->assertFalse(in_array('Custom', array_keys($headers)));
+        $expected = 'test, ' . Server::BEDITA_OBJECT_ID_HEADER . ', ' . Server::BEDITA_OBJECT_TYPE_HEADER;
+        $this->assertSame($expected, $headers['Access-Control-Expose-Headers']);
     }
 }
