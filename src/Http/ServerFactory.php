@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace BEdita\Tus\Http;
 
+use BEdita\AWS\Filesystem\Adapter\S3Adapter;
 use BEdita\Core\Filesystem\Adapter\LocalAdapter;
 use BEdita\Core\Filesystem\FilesystemRegistry;
 use BEdita\Tus\Middleware\Tus\HeadersMiddleware;
@@ -129,14 +130,30 @@ class ServerFactory
     protected function setupFilesystem()
     {
         $adapter = FilesystemRegistry::getInstance()->get($this->getConfig('filesystem'));
+        $isLocal = $adapter instanceof LocalAdapter;
+        $isS3 = $adapter instanceof S3Adapter;
+        if (!$isLocal && !$isS3) {
+            throw new InternalErrorException('Filesystem not supported.');
+        }
 
         // local adapter ready to use
-        if ($adapter instanceof LocalAdapter) {
+        if ($isLocal) {
             $this->uploadPath = $adapter->getConfig('path') . DS . $this->getConfig('uploadDir');
 
             return $this;
         }
 
-        throw new InternalErrorException('Filesystem not supported.');
+        // for S3 register stream wrapper https://www.php.net/manual/en/class.streamwrapper.php
+        /** @var \League\Flysystem\AwsS3v3\AwsS3Adapter $innerAdapter */
+        $innerAdapter = $adapter->getInnerAdapter();
+        $innerAdapter->getClient()->registerStreamWrapper();
+
+        $this->uploadPath = sprintf(
+            's3://%s/%s',
+            $adapter->getConfig('host'), // bucket.
+            $this->getConfig('uploadDir')
+        );
+
+        return $this;
     }
 }
