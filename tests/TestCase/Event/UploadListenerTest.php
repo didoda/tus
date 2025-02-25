@@ -15,14 +15,21 @@ declare(strict_types=1);
 
 namespace BEdita\Tus\Test\TestCase\Event;
 
+use BEdita\Core\Model\Entity\Media;
+use BEdita\Core\Model\Entity\ObjectEntity;
 use BEdita\Core\Model\Table\MediaTable;
 use BEdita\Core\Model\Table\StreamsTable;
 use BEdita\Tus\Event\UploadListener;
 use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\ORM\Table;
+use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use TusPhp\Events\TusEvent;
+use TusPhp\File;
+use TusPhp\Request;
+use TusPhp\Response;
 
 #[CoversClass(UploadListener::class)]
 class UploadListenerTest extends TestCase
@@ -118,14 +125,94 @@ class UploadListenerTest extends TestCase
      */
     public function testOnUploadComplete(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $listener = new class () extends UploadListener {
+            public function __construct(array $config = [])
+            {
+                /** @var \BEdita\Core\Model\Table\ObjectTypesTable $objectTypesTable */
+                $objectTypesTable = $this->fetchTable('ObjectTypes');
+                $objectType = $objectTypesTable->newEntity([
+                    'name' => 'media',
+                    'singular' => 'media',
+                    'plural' => 'media',
+                    'description' => 'Media object type',
+                    'plugin' => 'BEdita/Core',
+                    'model' => 'Objects',
+                    'associations' => [],
+                    'hidden' => [],
+                    'metadata' => [],
+                ]);
+                $config['objectType'] = $objectType;
+                parent::__construct($config);
+            }
+
+            public function finalize(File $file): ObjectEntity
+            {
+                $entity = new Media(['id' => 1, 'type' => 'media']);
+                $entity->id = 1;
+                $entity->type = 'media';
+
+                return $entity;
+            }
+        };
+        $tusEvent = new class () extends TusEvent {
+            public function resetData()
+            {
+                $this->file = new File('foo.txt');
+                $this->request = new Request();
+                $this->response = new Response();
+            }
+        };
+        $tusEvent->resetData();
+        $actual = $listener->onUploadComplete($tusEvent);
+        $this->assertInstanceOf(TusEvent::class, $actual);
+        $response = $actual->getResponse();
+        $headers = $response->getHeaders();
+        $this->assertArrayHasKey('BEdita-Object-Id', $headers);
+        $this->assertArrayHasKey('BEdita-Object-Type', $headers);
+        $this->assertEquals('1', $headers['BEdita-Object-Id']);
     }
 
     /**
-     * Test `finalize` method
+     * Test `onUploadComplete` method on exception
      */
-    public function testFinalize(): void
+    public function testOnUploadCompleteException(): void
     {
-        $this->markTestIncomplete('Not implemented yet.');
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('error');
+        $listener = new class () extends UploadListener {
+            public function __construct(array $config = [])
+            {
+                /** @var \BEdita\Core\Model\Table\ObjectTypesTable $objectTypesTable */
+                $objectTypesTable = $this->fetchTable('ObjectTypes');
+                $objectType = $objectTypesTable->newEntity([
+                    'name' => 'media',
+                    'singular' => 'media',
+                    'plural' => 'media',
+                    'description' => 'Media object type',
+                    'plugin' => 'BEdita/Core',
+                    'model' => 'Objects',
+                    'associations' => [],
+                    'hidden' => [],
+                    'metadata' => [],
+                ]);
+                $config['objectType'] = $objectType;
+                parent::__construct($config);
+            }
+
+            public function finalize(File $file): ObjectEntity
+            {
+                throw new Exception('error');
+            }
+        };
+        $tusEvent = new class () extends TusEvent {
+            public function resetData()
+            {
+                $this->file = new File('foo.txt');
+                $this->request = new Request();
+                $this->response = new Response();
+            }
+        };
+        $tusEvent->resetData();
+        $listener->onUploadComplete($tusEvent);
     }
 }
