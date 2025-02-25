@@ -14,9 +14,9 @@ declare(strict_types=1);
  */
 namespace BEdita\Tus\Http;
 
-use BEdita\AWS\Filesystem\Adapter\S3Adapter;
 use BEdita\Core\Filesystem\Adapter\LocalAdapter;
 use BEdita\Core\Filesystem\FilesystemRegistry;
+use BEdita\Tus\Filesystem\Adapter\S3Adapter;
 use BEdita\Tus\Middleware\Tus\HeadersMiddleware;
 use BEdita\Tus\Middleware\Tus\TrustProxiesMiddleware;
 use Cake\Core\InstanceConfigTrait;
@@ -144,10 +144,8 @@ class ServerFactory
         }
 
         // for S3 register stream wrapper https://www.php.net/manual/en/class.streamwrapper.php
-        /** @var \League\Flysystem\AwsS3v3\AwsS3Adapter $innerAdapter */
-        $innerAdapter = $adapter->getInnerAdapter();
-        $innerAdapter->getClient()->registerStreamWrapper();
-
+        /** @var \BEdita\Tus\Filesystem\Adapter\S3Adapter $adapter */
+        $adapter->getClient()->registerStreamWrapper();
         $this->uploadPath = sprintf(
             's3://%s/%s',
             $adapter->getConfig('host'), // bucket.
