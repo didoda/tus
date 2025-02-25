@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 use BEdita\Core\Filesystem\Adapter\LocalAdapter;
 use BEdita\Core\Filesystem\FilesystemRegistry;
+use BEdita\Core\ORM\Locator\TableLocator;
 use Cake\Cache\Cache;
 use Cake\Cache\Engine\ArrayEngine;
 use Cake\Cache\Engine\NullEngine;
@@ -34,6 +35,7 @@ use Cake\Log\Log;
 use Cake\ORM\TableRegistry;
 use Cake\Routing\Router;
 use Cake\Utility\Security;
+use Migrations\TestSuite\Migrator;
 
 $findRoot = function ($root) {
     do {
@@ -128,17 +130,24 @@ Cache::setConfig([
     '_bedita_core_' => ['className' => NullEngine::class],
 ]);
 
+ConnectionManager::drop('test');
 if (!getenv('db_dsn')) {
     putenv('db_dsn=sqlite:///:memory:');
 }
-ConnectionManager::setConfig('test', [
-    'url' => getenv('db_dsn'),
-    // 'log' => true,
-]);
+ConnectionManager::setConfig('test', ['url' => getenv('db_dsn')]);
 ConnectionManager::alias('test', 'default');
 
+if (!TableRegistry::getTableLocator() instanceof TableLocator) {
+    TableRegistry::setTableLocator(new TableLocator());
+}
+
+Security::setSalt('veulAP6msatcNj76a6iuOGwIYyasdNTn3ikc');
+
+(new Migrator())->runMany([
+    ['plugin' => 'BEdita/Core', 'connection' => 'test'],
+]);
+
 Router::reload();
-Security::setSalt('BEDITA');
 FrozenTime::setTestNow('2022-01-01T00:00:00+01:00');
 
 // clear all before running tests
