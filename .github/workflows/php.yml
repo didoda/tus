@@ -41,6 +41,9 @@ jobs:
       - name: 'Checkout current revision'
         uses: 'actions/checkout@v4'
 
+      - name: 'Composer config GH token if available'
+        run: 'if [ -n "$GH_TOKEN" ]; then composer config github-oauth.github.com ${GH_TOKEN}; fi'
+
       - name: 'Setup PHP'
         uses: 'shivammathur/setup-php@v2'
         with:
@@ -51,7 +54,7 @@ jobs:
 
       - name: 'Discover Composer cache directory'
         id: 'cachedir'
-        run: 'echo "::set-output name=path::$(composer global config cache-dir)"'
+        run: echo "path=$(composer global config cache-dir)" >> $GITHUB_OUTPUT
 
       - name: 'Share Composer cache across runs'
         uses: 'actions/cache@v4'
@@ -68,8 +71,15 @@ jobs:
       - name: 'Dump Composer autoloader'
         run: 'composer dump-autoload --classmap-authoritative --no-cache'
 
-      - name: 'Run PHPUnit'
-        run: 'vendor/bin/phpunit --coverage-clover=${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml'
+      - name: 'Run PHPUnit with coverage'
+        run: "vendor/bin/phpunit --coverage-clover=${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml"
+
+      - name: Check test coverage
+        id: test-coverage
+        uses: johanvanhelden/gha-clover-test-coverage-check@v1
+        with:
+          percentage: '70'
+          filename: "${{ matrix.php-version }}-${{ strategy.job-index }}-clover.xml"
 
       - name: 'Export coverage results'
         uses: 'codecov/codecov-action@v5'
