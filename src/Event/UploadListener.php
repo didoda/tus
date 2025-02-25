@@ -99,13 +99,11 @@ class UploadListener
      */
     protected function setTable(string $table): void
     {
-        $this->Table = $this->getTableLocator()->get($table);
-
-        if ($this->Table instanceof MediaTable || $this->Table->isTableInherited('Media', true)) {
-            return;
+        $ti = $this->getTableLocator()->get($table);
+        if (!$ti instanceof ObjectsBaseTable || (!$ti instanceof MediaTable && !$ti->isTableInherited('Media', true))) {
+            throw new InvalidArgumentException(sprintf('table %s must represent a media', $table));
         }
-
-        throw new InvalidArgumentException(sprintf('table %s must represent a media', $table));
+        $this->Table = $ti;
     }
 
     /**
