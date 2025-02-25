@@ -28,7 +28,15 @@ class S3AdapterTest extends TestCase
      */
     public function testGetClient(): void
     {
-        $adapter = new S3Adapter();
+        $adapter = new class () extends S3Adapter {
+            public function setMock(): void
+            {
+                $this->client = new S3Client([
+                    'region' => 'us-east-1',
+                ]);
+            }
+        };
+        $adapter->setMock();
         $this->assertInstanceOf(S3Client::class, $adapter->getClient());
     }
 }
