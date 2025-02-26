@@ -21,9 +21,7 @@ use BEdita\AWS\Filesystem\Adapter\S3Adapter as BEditaS3Adapter;
 class S3Adapter extends BEditaS3Adapter
 {
     /**
-     * Get the S3 client.
-     *
-     * @return \Aws\S3\S3Client
+     * @inheritDoc
      */
     public function getClient(): S3Client
     {
