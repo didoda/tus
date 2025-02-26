@@ -68,7 +68,9 @@ class CleanExpiredCommand extends Command
         return new class (Configure::read('Tus.cache')) extends Server
         {
             /**
-             * @inheritDoc
+             * {@inheritDoc}
+             *
+             * Check if content is expired - even if upload is completed.
              */
             protected function isExpired($contents): bool
             {
